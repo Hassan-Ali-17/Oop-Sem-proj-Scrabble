@@ -1,12 +1,36 @@
 #include "AIPlayer.h"
-#include <algorithm>
 #include <chrono>
 #include <random>
 
 const int AIPlayer::MAX_WORD_LENGTH;
-const int AIPlayer::MAX_POSITIONS; // 15 * 15
+const int AIPlayer::MAX_POSITIONS; 
 
 AIPlayer::AIPlayer(Dictionary& dict, Bag& b) : dictionary(dict), bag(b), wordCount(0) {}
+
+template<typename T>
+void customShuffle(T* arr, int size, std::mt19937& rng) {
+    for (int i = size - 1; i > 0; --i) {
+        std::uniform_int_distribution<int> dist(0, i);
+        int j = dist(rng);
+        T temp;
+        if constexpr (std::is_array_v<T>) {
+            for (size_t k = 0; k < std::extent_v<T>; ++k) {
+                temp[k] = arr[i][k];
+            }
+            for (size_t k = 0; k < std::extent_v<T>; ++k) {
+                arr[i][k] = arr[j][k];
+            }
+            for (size_t k = 0; k < std::extent_v<T>; ++k) {
+                arr[j][k] = temp[k];
+            }
+        }
+        else {
+            temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+}
 
 bool AIPlayer::makeRandomWord(Board* board, Rack* rack, std::string& randomWord, bool& isValid) {
     char letters[8] = { 0 };
@@ -104,7 +128,7 @@ bool AIPlayer::placeRandomWord(Board* board, Rack* rack, const std::string& word
                             break;
                         }
                     }
-                    if (valid&& posCount < MAX_POSITIONS) {
+                    if (valid && posCount < MAX_POSITIONS) {
                         positions[posCount][0] = i;
                         positions[posCount][1] = j;
                         posCount++;
@@ -114,16 +138,7 @@ bool AIPlayer::placeRandomWord(Board* board, Rack* rack, const std::string& word
         }
     }
 
-    // Shuffle positions
-    for (int i = posCount - 1; i > 0; --i) {
-        std::uniform_int_distribution<int> dist(0, i);
-        int j = dist(rng);
-        int temp[2] = { positions[i][0], positions[i][1] };
-        positions[i][0] = positions[j][0];
-        positions[i][1] = positions[j][1];
-        positions[j][0] = temp[0];
-        positions[j][1] = temp[1];
-    }
+    customShuffle(positions, posCount, rng);
 
     for (int i = 0; i < posCount; ++i) {
         int row = positions[i][0];
@@ -177,7 +192,7 @@ bool AIPlayer::makeMove(Board* board, Rack* rack, std::string& attemptedWord, bo
         static std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
         int wordIndices[MAX_WORDS];
         for (int i = 0; i < wordCount; ++i) wordIndices[i] = i;
-        std::shuffle(wordIndices, wordIndices + wordCount, rng);
+        customShuffle(wordIndices, wordCount, rng);
 
         for (int w = 0; w < wordCount; ++w) {
             char* word = possibleWords[wordIndices[w]];
