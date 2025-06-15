@@ -15,7 +15,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(1100, 600), "Scrabble Game");
     window.setFramerateLimit(60);
     sf::Event event;
-    Rack* racks[2]; // Two players: Human (0) and AI (1)
+    Rack* racks[2]; 
     Dictionary dictionary("dictionary.txt");
     AIPlayer ai(dictionary, bag);
 
@@ -48,8 +48,8 @@ int main() {
     scoreText.setPosition(650, 50);
     scoreText.setString("Player: 0 | AI: 0");
 
-    racks[0] = new Rack(1); // Human
-    racks[1] = new Rack(2); // AI
+    racks[0] = new Rack(1); 
+    racks[1] = new Rack(2);
     racks[0]->fillRack(bag);
     racks[1]->fillRack(bag);
 
@@ -61,7 +61,7 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (activeRack == 0) { // Human player's turn
+            if (activeRack == 0) { 
                 if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
@@ -354,7 +354,7 @@ int main() {
             }
         }
 
-        // AI's turn
+        
         if (activeRack == 1 && !waitingForAIWordApproval) {
             statusText.setString("AI is thinking...");
             window.clear(sf::Color::Black);
@@ -485,7 +485,6 @@ int main() {
             }
         }
 
-        // Handle AI word approval
         if (waitingForAIWordApproval && event.type == sf::Event::MouseButtonPressed) {
             if (yesNoDialog.isYesClicked(window)) {
                 dictionary.addWordToDictionary(aiAttemptedWord);
